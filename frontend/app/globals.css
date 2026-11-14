@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/*
+ * StoreBridge design tokens.
+ * Brand colours are fixed by the brand guide; everything else derives from them.
+ * Light surfaces carry the interface, navy gives structure, teal marks the one
+ * thing to act on. Add tokens here rather than hard-coding values in components.
+ */
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand */
+  --color-navy: #000052;
+  --color-teal: #00c9a3;
+  --color-mint: #c5fcee;
+  --color-sage: #4e8075;
+
+  /* Derived from the brand colours */
+  --color-navy-raised: #12126b; /* hover and active rows on navy */
+  --color-navy-line: #26267a; /* dividers on navy */
+  --color-on-navy: #c9cbe8; /* resting text on navy */
+  --color-teal-strong: #00b08f; /* pressed and hover state of teal */
+  --color-teal-ink: #007562; /* teal that passes contrast as text on white */
+  --color-mint-soft: #ecfef9; /* quiet selected and success backgrounds */
+
+  /* Neutrals, tinted slightly toward navy so they sit with the brand */
+  --color-ink: #10103a;
+  --color-muted: #5a5e78;
+  --color-faint: #8b8fa6;
+  --color-line: #e4e6ee;
+  --color-canvas: #f6f7fa;
+  --color-surface: #ffffff;
+
+  /* Status */
+  --color-danger: #b42318;
+  --color-danger-soft: #fef3f2;
+  --color-warning: #93500b;
+  --color-warning-soft: #fff6e6;
+
+  /* Two radii only: controls and containers. */
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+
+  /* Type scale (1.2 minor third from 14px, the dashboard's base size) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.4375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.5rem;
+
+  --shadow-panel: 0 1px 2px rgb(0 0 82 / 0.05);
+  --shadow-popover: 0 8px 24px rgb(0 0 82 / 0.12), 0 1px 2px rgb(0 0 82 / 0.06);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  /* One visible focus treatment everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-mint);
+    color: var(--color-navy);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}

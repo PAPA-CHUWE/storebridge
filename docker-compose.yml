@@ -1,0 +1,148 @@
+# Local development stack. Run `make setup` once to create .env, then `make up`.
+# Saleor needs roughly 2 GB of free memory for its API and worker.
+
+x-saleor: &saleor
+  image: ghcr.io/saleor/saleor:${SALEOR_VERSION:-3.23}
+  environment: &saleor-env
+    DATABASE_URL: postgres://saleor:${SALEOR_DB_PASSWORD}@postgres:5432/saleor
+    CACHE_URL: redis://redis:6379/0
+    CELERY_BROKER_URL: redis://redis:6379/1
+    SECRET_KEY: ${SALEOR_SECRET_KEY}
+    # Signs staff and customer JWTs. The StoreBridge API verifies them through Saleor's JWKS.
+    RSA_PRIVATE_KEY: ${SALEOR_RSA_PRIVATE_KEY}
+    ALLOWED_HOSTS: localhost,127.0.0.1,saleor-api
+    ALLOWED_CLIENT_HOSTS: localhost,127.0.0.1
+    PUBLIC_URL: http://localhost:${SALEOR_API_PORT:-8000}/
+    DEFAULT_CHANNEL_SLUG: default-channel
+    DEFAULT_FROM_EMAIL: StoreBridge <noreply@storebridge.localhost>
+    EMAIL_URL: smtp://mailpit:1025
+  volumes:
+    - saleor-media:/app/media
+
+x-backend: &backend
+  build: ./backend
+  environment:
+    ENVIRONMENT: development
+    DATABASE_URL: postgresql+asyncpg://storebridge:${STOREBRIDGE_DB_PASSWORD}@postgres:5432/storebridge
+    REDIS_URL: redis://redis:6379/2
+    SALEOR_API_URL: http://saleor-api:8000/graphql/
+    CORS_ORIGINS: '["http://localhost:${FRONTEND_PORT:-3000}"]'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SALEOR_DB_PASSWORD: ${SALEOR_DB_PASSWORD}
+      STOREBRIDGE_DB_PASSWORD: ${STOREBRIDGE_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Catches every email the stack sends in development. Inbox: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+
+  saleor-migrate:
+    <<: *saleor
+    command: python3 manage.py migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  saleor-api:
+    <<: *saleor
+    ports:
+      - "${SALEOR_API_PORT:-8000}:8000"
+    depends_on:
+      saleor-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  saleor-worker:
+    <<: *saleor
+    command: celery -A saleor --app=saleor.celeryconf:app worker --loglevel=info -B
+    depends_on:
+      saleor-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backend-migrate:
+    <<: *backend
+    command: alembic upgrade head
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    <<: *backend
+    ports:
+      - "${BACKEND_PORT:-8001}:8001"
+    depends_on:
+      backend-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health/live')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  worker:
+    <<: *backend
+    command: arq app.workers.settings.WorkerSettings
+    depends_on:
+      backend-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    environment:
+      SALEOR_API_URL: http://saleor-api:8000/graphql/
+      STOREBRIDGE_API_URL: http://backend:8001
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - saleor-api
+      - backend
+    restart: unless-stopped
+
+  # Saleor's own admin. Use it to manage the catalogue until StoreBridge's commerce
+  # screens land in Phase 2: `docker compose --profile tools up -d saleor-dashboard`
+  saleor-dashboard:
+    image: ghcr.io/saleor/saleor-dashboard:${SALEOR_VERSION:-3.23}
+    profiles: ["tools"]
+    environment:
+      API_URL: http://localhost:${SALEOR_API_PORT:-8000}/graphql/
+    ports:
+      - "${SALEOR_DASHBOARD_PORT:-9000}:80"
+
+volumes:
+  postgres-data:
+  saleor-media:
