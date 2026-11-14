@@ -9,6 +9,13 @@ export function formatMoney(amount: number, currency: string) {
   return new Intl.NumberFormat("en", { style: "currency", currency }).format(amount);
 }
 
+/** Whole-percent saving, or null when the current price is not genuinely lower. */
+export function discountPercent(price: number, undiscounted: number) {
+  if (!(undiscounted > price) || price < 0) return null;
+  const percent = Math.round((1 - price / undiscounted) * 100);
+  return percent > 0 ? percent : null;
+}
+
 export function formatCount(value: number) {
   return new Intl.NumberFormat("en").format(value);
 }
