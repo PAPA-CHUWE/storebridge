@@ -18,7 +18,7 @@ In **Settings → Secrets and variables → Actions**, add these repository secr
 
 The standard `GITHUB_TOKEN` is used for public repository/fork API calls and the private workflow-state branch. Both workflows declare the minimum repository permission they need (`contents: write` for persistent state). Confirm that the repository's Actions settings allow this token permission. No credential should be placed in workflow YAML or committed files.
 
-Email delivery uses Python's standard SMTP library with TLS (implicit TLS on port 465, STARTTLS on other ports). A misconfigured or rejected SMTP connection fails the workflow rather than silently reporting success.
+Email delivery uses Python's standard SMTP library with TLS (implicit TLS on port 465, STARTTLS on other ports). When required secrets are missing, the workflow emits a warning and skips the notification. A configured but rejected SMTP connection fails the workflow rather than silently reporting success.
 
 ## What is monitored
 
