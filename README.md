@@ -1,8 +1,10 @@
 # StoreBridge
 
-Commerce, connected intelligently. StoreBridge is an AI-powered ecommerce engineering project built around Saleor, FastAPI and Next.js. It combines a customer storefront and merchant dashboard with a supplier-aware AI product drafting workflow, while Saleor remains the system of record for commerce.
+Commerce, connected intelligently. StoreBridge is an open-source AI-powered ecommerce and dropshipping platform in active development, built around Saleor, FastAPI and Next.js. It combines a customer storefront and merchant dashboard with supplier data ingestion and multimodal AI-assisted product drafting, while Saleor remains the system of record for commerce.
 
 **Current status: active foundation with core commerce and AI-assisted product creation in progress.** The repository includes a Next.js storefront and dashboard, Saleor GraphQL integration, FastAPI services, and an AI-assisted product draft flow. The backend AI Studio, RAG, background AI workflows, and several operational capabilities remain planned. This README separates shipped behavior from roadmap items.
+
+StoreBridge is released under the [MIT License](LICENSE). Forks and contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report vulnerabilities privately using [SECURITY.md](SECURITY.md). Community notification setup and its GitHub API limitations are documented in [docs/COMMUNITY.md](docs/COMMUNITY.md).
 
 ## System Architecture
 
@@ -164,3 +166,7 @@ infrastructure/  PostgreSQL initialization and reverse-proxy configuration
 scripts/         Local stack bootstrap, health checks and run helpers
 docs/            Architecture decisions and system diagrams
 ```
+
+## Contributing
+
+You can fork StoreBridge, make changes on a branch, and open a pull request. Issues and focused feature proposals are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change. This project welcomes community contributions while keeping direct repository write access limited to trusted collaborators.
