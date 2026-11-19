@@ -1,6 +1,6 @@
 # StoreBridge
 
-Commerce, connected intelligently. StoreBridge is an AI-powered ecommerce engineering project built around Saleor, FastAPI and Next.js. It combines a customer storefront and merchant dashboard with a supplier-aware AI product drafting workflow, while Saleor remains the system of record for commerce.
+Commerce, connected intelligently. StoreBridge is an open-source AI-powered ecommerce and dropshipping platform in active development, built around Saleor, FastAPI and Next.js. It combines a customer storefront and merchant dashboard with supplier data ingestion and multimodal AI-assisted product drafting, while Saleor remains the system of record for commerce.
 
 **Current status: active foundation with core commerce and AI-assisted product creation in progress.** The repository includes a Next.js storefront and dashboard, Saleor GraphQL integration, FastAPI services, and an AI-assisted product draft flow. The backend AI Studio, RAG, background AI workflows, and several operational capabilities remain planned. This README separates shipped behavior from roadmap items.
 
