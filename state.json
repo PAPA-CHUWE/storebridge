@@ -1,5 +1,11 @@
 {
   "clone_stats": null,
-  "events": {},
+  "events": {
+    "pr:3:opened:2026-11-19T14:50:23Z": {
+      "at": "2026-11-19T14:50:40.421537+00:00",
+      "run_id": "44548112316-1",
+      "status": "pending"
+    }
+  },
   "fork_heads": {}
 }
